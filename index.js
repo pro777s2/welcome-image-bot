@@ -1,25 +1,18 @@
-// 🔧 FORCE IPV4 (Railway + Discord CDN fix)
+// 🔧 FORCE IPV4 (fixes Cloudflare / CDN timeout on Railway & Windows)
 process.env.NODE_OPTIONS = "--dns-result-order=ipv4first";
 
 const { Client, GatewayIntentBits, AttachmentBuilder } = require('discord.js');
 const Canvas = require('canvas');
 const path = require('path');
 
-// 🧠 REGISTER FONT (THIS FIXES THE □□□ ISSUE)
-Canvas.registerFont(
-  path.join(__dirname, 'fonts', 'Poppins-Bold.ttf'),
-  { family: 'Poppins' }
-);
-
 // 🔧 CONFIG
-const WELCOME_CHANNEL_ID = '1469938285827592323';
+const WELCOME_CHANNEL_ID = '1469938285827592323'; // <-- your channel ID
 
+// 🤖 DISCORD CLIENT
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
-    GatewayIntentBits.GuildMembers,
-    GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.MessageContent
+    GatewayIntentBits.GuildMembers
   ]
 });
 
@@ -28,45 +21,41 @@ client.once('ready', () => {
   console.log(`🟢 Bot online as ${client.user.tag}`);
 });
 
-// 🧪 TEST COMMAND
-client.on('messageCreate', async (message) => {
-  if (message.author.bot) return;
-  if (message.content !== '!testwelcome') return;
-
-  await safeWelcome(message.author, message.guild);
-});
-
 // 👤 AUTO WELCOME
 client.on('guildMemberAdd', async (member) => {
-  console.log(`👤 New member joined: ${member.user.tag}`);
-  await safeWelcome(member.user, member.guild);
+  try {
+    await sendWelcomeImage(member);
+  } catch (err) {
+    console.error('⚠️ Welcome failed:', err.message);
+  }
 });
 
-// 🛡️ SAFE WRAPPER
-async function safeWelcome(user, guild) {
-  try {
-    await sendWelcomeImage(user, guild);
-  } catch (err) {
-    console.error('⚠️ Welcome failed (ignored):', err.message);
-  }
-}
-
 // 🖼️ IMAGE FUNCTION
-async function sendWelcomeImage(user, guild) {
-  const channel = guild.channels.cache.get(WELCOME_CHANNEL_ID);
+async function sendWelcomeImage(member) {
+  const channel = member.guild.channels.cache.get(WELCOME_CHANNEL_ID);
   if (!channel) return;
+
+  // 🎨 REGISTER FONT (IMPORTANT)
+  Canvas.registerFont(
+    path.join(__dirname, 'fonts', 'Orbitron-Bold.ttf'),
+    { family: 'Orbitron' }
+  );
 
   const canvas = Canvas.createCanvas(800, 450);
   const ctx = canvas.getContext('2d');
 
   // 🖼️ BACKGROUND
-  const background = await Canvas.loadImage('./welcome.png');
+  const background = await Canvas.loadImage(
+    path.join(__dirname, 'welcome.png')
+  );
   ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
 
   // 👤 AVATAR
-  const avatar = await Canvas.loadImage(
-    user.displayAvatarURL({ extension: 'png', size: 256 })
-  );
+  const avatarURL = member.user.displayAvatarURL({
+    extension: 'png',
+    size: 256
+  });
+  const avatar = await Canvas.loadImage(avatarURL);
 
   ctx.save();
   ctx.beginPath();
@@ -76,45 +65,47 @@ async function sendWelcomeImage(user, guild) {
   ctx.drawImage(avatar, 330, 120, 140, 140);
   ctx.restore();
 
-  const username = user.username;
+  // ✨ USERNAME (NEON EFFECT)
+  const username = member.user.username;
 
-  // ✨ NEON USERNAME (UNDER AVATAR)
-  ctx.font = 'bold 34px Poppins';
   ctx.textAlign = 'center';
+  ctx.font = 'bold 38px Orbitron';
 
+  // Glow
   ctx.shadowColor = '#00ffff';
-  ctx.shadowBlur = 20;
+  ctx.shadowBlur = 25;
   ctx.fillStyle = '#00ffff';
-  ctx.fillText(username, 400, 300);
+  ctx.fillText(username, 400, 310);
 
+  // Sharp text
   ctx.shadowBlur = 0;
   ctx.fillStyle = '#ffffff';
-  ctx.fillText(username, 400, 300);
+  ctx.fillText(username, 400, 310);
 
-  // 🔥 MAIN TEXT (BOTTOM)
-  ctx.font = 'bold 36px Poppins';
+  // 📝 WELCOME TEXT
+  ctx.font = 'bold 30px Orbitron';
   ctx.fillStyle = '#ffffff';
   ctx.fillText(
     'Welcome to the ART OF CURSE!!!',
     400,
-    420
+    360
   );
 
+  // 📦 SEND IMAGE
   const attachment = new AttachmentBuilder(canvas.toBuffer(), {
     name: 'welcome.png'
   });
 
-  // 🚀 SEND MESSAGE
   await channel.send({
-    content: `🔥 Vanga bro <@${user.id}> ethu nama ART OF CURSE!!!`,
+    content: `🔥 Vanga bro <@${member.id}> ethu nama ART OF CURSE!!! 💀`,
     files: [attachment]
   });
 }
 
-// 🔐 LOGIN (Railway Variable)
+// 🔐 LOGIN (Railway Environment Variable)
 client.login(process.env.BOT_TOKEN);
 
-// 🛑 NEVER CRASH
+// 🛑 SAFETY (never crash Railway)
 process.on('unhandledRejection', (err) => {
-  console.error('⚠️ Unhandled rejection (ignored):', err.message);
+  console.error('⚠️ Unhandled rejection:', err);
 });
