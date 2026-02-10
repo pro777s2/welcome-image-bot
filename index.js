@@ -69,40 +69,38 @@ async function sendWelcomeImage(user, guild) {
     ctx.restore();
 
     // =================================================
-    // 🔥 USERNAME (NEON STRONG)
+    // 🔥 USERNAME (STRONG NEON)
     // =================================================
     ctx.textAlign = "center";
     ctx.font = "bold 42px Orbitron";
 
-    // Strong glow
     ctx.shadowColor = "#00ffff";
     ctx.shadowBlur = 35;
     ctx.fillStyle = "#00ffff";
     ctx.fillText(user.username, 400, 300);
 
-    // Sharp core
     ctx.shadowBlur = 0;
     ctx.fillStyle = "#ffffff";
     ctx.fillText(user.username, 400, 300);
 
     // =================================================
-    // 🔥 WELCOME TEXT (DIFFERENT FONT STYLE)
+    // 🔥 WELCOME TEXT (LOWER + BOLD + CLEAN)
     // =================================================
     const welcomeText = "WELCOME TO THE ART OF CURSE!!!";
 
     ctx.font = "bold 34px Arial Black"; // different font
     ctx.textAlign = "center";
 
-    // VERY STRONG NEON
+    // Neon glow
     ctx.shadowColor = "#ff0055";
     ctx.shadowBlur = 45;
     ctx.fillStyle = "#ff0055";
-    ctx.fillText(welcomeText, 400, 405); // LOWER POSITION ✅
+    ctx.fillText(welcomeText, 400, 405); // 🔽 LOWERED HERE ✅
 
-    // Sharp layer
+    // Sharp core
     ctx.shadowBlur = 0;
     ctx.fillStyle = "#ffffff";
-    ctx.fillText(welcomeText, 400, 385);
+    ctx.fillText(welcomeText, 400, 405);
 
     // ---------- SEND ----------
     const attachment = new AttachmentBuilder(canvas.toBuffer(), {
@@ -125,4 +123,3 @@ client.login(process.env.BOT_TOKEN);
 process.on("unhandledRejection", (err) => {
   console.error("⚠️ Unhandled rejection:", err);
 });
-
