@@ -88,19 +88,19 @@ async function sendWelcomeImage(user, guild) {
     // =================================================
     const welcomeText = "WELCOME TO THE ART OF CURSE!!!";
 
-    ctx.font = "bold 34px Arial Black"; // different font
+    ctx.font = "bold 28px Arial Black"; // different font
     ctx.textAlign = "center";
 
     // Neon glow
     ctx.shadowColor = "#ff0055";
     ctx.shadowBlur = 45;
     ctx.fillStyle = "#ff0055";
-    ctx.fillText(welcomeText, 400, 405); // 🔽 LOWERED HERE ✅
+    ctx.fillText(welcomeText, 400, 410); // 🔽 LOWERED HERE ✅
 
     // Sharp core
     ctx.shadowBlur = 0;
     ctx.fillStyle = "#ffffff";
-    ctx.fillText(welcomeText, 400, 405);
+    ctx.fillText(welcomeText, 400, 410);
 
     // ---------- SEND ----------
     const attachment = new AttachmentBuilder(canvas.toBuffer(), {
@@ -123,3 +123,4 @@ client.login(process.env.BOT_TOKEN);
 process.on("unhandledRejection", (err) => {
   console.error("⚠️ Unhandled rejection:", err);
 });
+
