@@ -1,8 +1,15 @@
-// 🔧 FORCE IPV4 (fixes Windows + Discord CDN issues)
+// 🔧 FORCE IPV4 (Railway + Discord CDN fix)
 process.env.NODE_OPTIONS = "--dns-result-order=ipv4first";
 
 const { Client, GatewayIntentBits, AttachmentBuilder } = require('discord.js');
 const Canvas = require('canvas');
+const path = require('path');
+
+// 🧠 REGISTER FONT (THIS FIXES THE □□□ ISSUE)
+Canvas.registerFont(
+  path.join(__dirname, 'fonts', 'Poppins-Bold.ttf'),
+  { family: 'Poppins' }
+);
 
 // 🔧 CONFIG
 const WELCOME_CHANNEL_ID = '1469938285827592323';
@@ -52,11 +59,11 @@ async function sendWelcomeImage(user, guild) {
   const canvas = Canvas.createCanvas(800, 450);
   const ctx = canvas.getContext('2d');
 
-  // Background
+  // 🖼️ BACKGROUND
   const background = await Canvas.loadImage('./welcome.png');
   ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
 
-  // Avatar
+  // 👤 AVATAR
   const avatar = await Canvas.loadImage(
     user.displayAvatarURL({ extension: 'png', size: 256 })
   );
@@ -71,8 +78,8 @@ async function sendWelcomeImage(user, guild) {
 
   const username = user.username;
 
-  // ✨ NEON USERNAME BELOW AVATAR
-  ctx.font = 'bold 34px Arial';
+  // ✨ NEON USERNAME (UNDER AVATAR)
+  ctx.font = 'bold 34px Poppins';
   ctx.textAlign = 'center';
 
   ctx.shadowColor = '#00ffff';
@@ -85,10 +92,13 @@ async function sendWelcomeImage(user, guild) {
   ctx.fillText(username, 400, 300);
 
   // 🔥 MAIN TEXT (BOTTOM)
-  ctx.font = 'bold 36px Arial';
+  ctx.font = 'bold 36px Poppins';
   ctx.fillStyle = '#ffffff';
-  ctx.textAlign = 'center';
-  ctx.fillText('Welcome to the ART OF CURSE!!!', 400, 420);
+  ctx.fillText(
+    'Welcome to the ART OF CURSE!!!',
+    400,
+    420
+  );
 
   const attachment = new AttachmentBuilder(canvas.toBuffer(), {
     name: 'welcome.png'
@@ -101,7 +111,7 @@ async function sendWelcomeImage(user, guild) {
   });
 }
 
-// 🔐 LOGIN
+// 🔐 LOGIN (Railway Variable)
 client.login(process.env.BOT_TOKEN);
 
 // 🛑 NEVER CRASH
