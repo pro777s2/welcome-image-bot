@@ -1,111 +1,127 @@
-// 🔧 FORCE IPV4 (fixes Cloudflare / CDN timeout on Railway & Windows)
+// 🔧 Force IPv4 (important for Railway + Discord)
 process.env.NODE_OPTIONS = "--dns-result-order=ipv4first";
 
-const { Client, GatewayIntentBits, AttachmentBuilder } = require('discord.js');
-const Canvas = require('canvas');
-const path = require('path');
+const { Client, GatewayIntentBits, AttachmentBuilder } = require("discord.js");
+const Canvas = require("canvas");
+const path = require("path");
 
-// 🔧 CONFIG
-const WELCOME_CHANNEL_ID = '1469938285827592323'; // <-- your channel ID
+// ================= CONFIG =================
+const WELCOME_CHANNEL_ID = "1469938285827592323";
 
-// 🤖 DISCORD CLIENT
+// ================= DISCORD CLIENT =================
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
-    GatewayIntentBits.GuildMembers
-  ]
+    GatewayIntentBits.GuildMembers,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.MessageContent,
+  ],
 });
 
-// 🟢 READY
-client.once('ready', () => {
+// ================= REGISTER FONTS =================
+Canvas.registerFont(
+  path.join(__dirname, "fonts", "Orbitron-Bold.ttf"),
+  { family: "Orbitron" }
+);
+
+// ================= READY =================
+client.once("ready", () => {
   console.log(`🟢 Bot online as ${client.user.tag}`);
 });
 
-// 👤 AUTO WELCOME
-client.on('guildMemberAdd', async (member) => {
-  try {
-    await sendWelcomeImage(member);
-  } catch (err) {
-    console.error('⚠️ Welcome failed:', err.message);
-  }
+// ================= TEST COMMAND =================
+client.on("messageCreate", async (message) => {
+  if (message.author.bot) return;
+  if (message.content !== "!testwelcome") return;
+
+  sendWelcomeImage(message.author, message.guild);
 });
 
-// 🖼️ IMAGE FUNCTION
-async function sendWelcomeImage(member) {
-  const channel = member.guild.channels.cache.get(WELCOME_CHANNEL_ID);
-  if (!channel) return;
+// ================= AUTO WELCOME =================
+client.on("guildMemberAdd", async (member) => {
+  sendWelcomeImage(member.user, member.guild);
+});
 
-  // 🎨 REGISTER FONT (IMPORTANT)
-  Canvas.registerFont(
-    path.join(__dirname, 'fonts', 'Orbitron-Bold.ttf'),
-    { family: 'Orbitron' }
-  );
+// ================= MAIN IMAGE FUNCTION =================
+async function sendWelcomeImage(user, guild) {
+  try {
+    const channel = guild.channels.cache.get(WELCOME_CHANNEL_ID);
+    if (!channel) return;
 
-  const canvas = Canvas.createCanvas(800, 450);
-  const ctx = canvas.getContext('2d');
+    const canvas = Canvas.createCanvas(800, 450);
+    const ctx = canvas.getContext("2d");
 
-  // 🖼️ BACKGROUND
-  const background = await Canvas.loadImage(
-    path.join(__dirname, 'welcome.png')
-  );
-  ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
+    // ---------- BACKGROUND ----------
+    const background = await Canvas.loadImage("./welcome.png");
+    ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
 
-  // 👤 AVATAR
-  const avatarURL = member.user.displayAvatarURL({
-    extension: 'png',
-    size: 256
-  });
-  const avatar = await Canvas.loadImage(avatarURL);
+    // ---------- AVATAR ----------
+    const avatar = await Canvas.loadImage(
+      user.displayAvatarURL({ extension: "png", size: 256 })
+    );
 
-  ctx.save();
-  ctx.beginPath();
-  ctx.arc(400, 190, 70, 0, Math.PI * 2);
-  ctx.closePath();
-  ctx.clip();
-  ctx.drawImage(avatar, 330, 120, 140, 140);
-  ctx.restore();
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(400, 195, 70, 0, Math.PI * 2);
+    ctx.closePath();
+    ctx.clip();
+    ctx.drawImage(avatar, 330, 125, 140, 140);
+    ctx.restore();
 
-  // ✨ USERNAME (NEON EFFECT)
-  const username = member.user.username;
+    // =================================================
+    // 🔥 USERNAME (NEON STRONG)
+    // =================================================
+    ctx.textAlign = "center";
+    ctx.font = "bold 42px Orbitron";
 
-  ctx.textAlign = 'center';
-  ctx.font = 'bold 38px Orbitron';
+    // Strong glow
+    ctx.shadowColor = "#00ffff";
+    ctx.shadowBlur = 35;
+    ctx.fillStyle = "#00ffff";
+    ctx.fillText(user.username, 400, 300);
 
-  // Glow
-  ctx.shadowColor = '#00ffff';
-  ctx.shadowBlur = 25;
-  ctx.fillStyle = '#00ffff';
-  ctx.fillText(username, 400, 310);
+    // Sharp core
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = "#ffffff";
+    ctx.fillText(user.username, 400, 300);
 
-  // Sharp text
-  ctx.shadowBlur = 0;
-  ctx.fillStyle = '#ffffff';
-  ctx.fillText(username, 400, 310);
+    // =================================================
+    // 🔥 WELCOME TEXT (DIFFERENT FONT STYLE)
+    // =================================================
+    const welcomeText = "WELCOME TO THE ART OF CURSE!!!";
 
-  // 📝 WELCOME TEXT
-  ctx.font = 'bold 30px Orbitron';
-  ctx.fillStyle = '#ffffff';
-  ctx.fillText(
-    'Welcome to the ART OF CURSE!!!',
-    400,
-    360
-  );
+    ctx.font = "bold 34px Arial Black"; // different font
+    ctx.textAlign = "center";
 
-  // 📦 SEND IMAGE
-  const attachment = new AttachmentBuilder(canvas.toBuffer(), {
-    name: 'welcome.png'
-  });
+    // VERY STRONG NEON
+    ctx.shadowColor = "#ff0055";
+    ctx.shadowBlur = 45;
+    ctx.fillStyle = "#ff0055";
+    ctx.fillText(welcomeText, 400, 385); // LOWER POSITION ✅
 
-  await channel.send({
-    content: `🔥 Vanga bro <@${member.id}> ethu nama ART OF CURSE!!! 💀`,
-    files: [attachment]
-  });
+    // Sharp layer
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = "#ffffff";
+    ctx.fillText(welcomeText, 400, 385);
+
+    // ---------- SEND ----------
+    const attachment = new AttachmentBuilder(canvas.toBuffer(), {
+      name: "welcome.png",
+    });
+
+    await channel.send({
+      content: `🔥 Vanga bro <@${user.id}> ethu nama ART OF CURSE!!! 💀`,
+      files: [attachment],
+    });
+  } catch (err) {
+    console.error("⚠️ Welcome image failed:", err.message);
+  }
 }
 
-// 🔐 LOGIN (Railway Environment Variable)
+// ================= LOGIN =================
 client.login(process.env.BOT_TOKEN);
 
-// 🛑 SAFETY (never crash Railway)
-process.on('unhandledRejection', (err) => {
-  console.error('⚠️ Unhandled rejection:', err);
+// ================= SAFETY =================
+process.on("unhandledRejection", (err) => {
+  console.error("⚠️ Unhandled rejection:", err);
 });
