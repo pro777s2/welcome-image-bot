@@ -97,7 +97,7 @@ async function sendWelcomeImage(user, guild) {
     ctx.shadowColor = "#ff0055";
     ctx.shadowBlur = 45;
     ctx.fillStyle = "#ff0055";
-    ctx.fillText(welcomeText, 400, 385); // LOWER POSITION ✅
+    ctx.fillText(welcomeText, 400, 405); // LOWER POSITION ✅
 
     // Sharp layer
     ctx.shadowBlur = 0;
@@ -125,3 +125,4 @@ client.login(process.env.BOT_TOKEN);
 process.on("unhandledRejection", (err) => {
   console.error("⚠️ Unhandled rejection:", err);
 });
+
